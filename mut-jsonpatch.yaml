@@ -1,0 +1,38 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: deployment-mutate-replicas-2
+  annotations:
+    policies.kyverno.io/title: Require Replcas Count 2
+    policies.kyverno.io/category: Lab-policy
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Deployment, Labels
+    policies.kyverno.io/description: >-
+      This simple policy sets/replaces  deployemnt with `env:dev` label replica count = 2
+spec:
+  validationFailureAction: Enforce
+#  background: false
+  rules:
+    - name: check-for-replicas
+      match:
+        all:
+          - resources:
+              kinds:
+                - Deployment
+                - Deployment/scale
+      preconditions:
+        any:
+        - key: "{{ request.object.metadata.labels.env }}"
+          operator: Equals
+          value: staging
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kyverno
+      mutate:
+        patchesJson6902: |-
+          - op: add
+            path: "/spec/replicas"
+            value: 2
