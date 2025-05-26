@@ -1,0 +1,41 @@
+kyverno apply limit_deployment_replica.yaml --resource deployment_staging.yaml
+
+This is how mutating policy test works, just apply the policy against the resource.
+The output will look like:
+
+
+Applying 1 policy rule(s) to 1 resource(s)...
+
+policy check-deployment applied to default/Deployment/web:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    env: staging
+  name: web
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx:latest
+        name: nginx
+        ports:
+        - containerPort: 80
+
+---
+
+
+Mutation:
+Mutation has been applied successfully.
+pass: 1, fail: 0, warn: 0, error: 0, skip: 0 
+
+
+save this output as a patched_resource.yaml, it will be required for the kind: Test resource
